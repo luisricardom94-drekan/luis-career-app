@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan de Estudios — Luis Martinez</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --border: #e8e5e0;
+    --text: #1a1917;
+    --text2: #6b6860;
+    --text3: #9e9b96;
+    --blue: #1F4E79;
+    --blue-light: #e8f0f8;
+    --green: #2d6a2d;
+    --green-light: #eaf3ea;
+    --amber: #7a4f00;
+    --amber-light: #fef3e2;
+    --red: #8b1a1a;
+    --red-light: #fdecea;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+  }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .logo { font-size: 16px; font-weight: 600; color: var(--blue); letter-spacing: -.3px; }
+  .nav-link { font-size: 14px; color: var(--text2); text-decoration: none; padding: 6px 12px; border-radius: var(--radius-sm); transition: background .15s; }
+  .nav-link:hover { background: var(--bg); color: var(--text); }
+  .nav-link.active { background: var(--blue-light); color: var(--blue); font-weight: 500; }
+
+  .page { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  .page-header { margin-bottom: 2rem; }
+  .page-title { font-size: 24px; font-weight: 600; letter-spacing: -.4px; margin-bottom: 4px; }
+  .page-sub { font-size: 14px; color: var(--text2); }
+
+  .metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 2rem; }
+  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.25rem; }
+  .metric-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; }
+  .metric-val { font-size: 26px; font-weight: 600; color: var(--text); line-height: 1; }
+  .metric-bar { height: 4px; background: var(--bg); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+  .metric-fill { height: 100%; background: var(--blue); border-radius: 2px; transition: width .5s ease; }
+
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 12px; }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter { font-size: 13px; padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); cursor: pointer; background: var(--surface); color: var(--text2); transition: all .15s; font-family: 'DM Sans', sans-serif; }
+  .filter:hover { border-color: var(--blue); color: var(--blue); }
+  .filter.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; font-weight: 500; transition: all .15s; }
+  .btn:hover { background: var(--bg); }
+  .btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .btn-primary:hover { background: #185a8d; }
+  .btn-danger { color: var(--red); border-color: #f5c5c5; }
+  .btn-danger:hover { background: var(--red-light); }
+
+  .phase { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; overflow: hidden; }
+  .phase-header { display: flex; align-items: center; gap: 12px; padding: 1rem 1.25rem; cursor: pointer; user-select: none; transition: background .15s; }
+  .phase-header:hover { background: var(--bg); }
+  .phase-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; text-transform: uppercase; letter-spacing: .04em; }
+  .badge-alta { background: var(--red-light); color: var(--red); }
+  .badge-media { background: var(--amber-light); color: var(--amber); }
+  .badge-baja { background: var(--green-light); color: var(--green); }
+  .phase-title { font-size: 14px; font-weight: 500; flex: 1; }
+  .phase-meta { font-size: 12px; color: var(--text3); white-space: nowrap; }
+  .phase-arrow { font-size: 11px; color: var(--text3); transition: transform .2s; }
+  .phase-arrow.open { transform: rotate(180deg); }
+
+  .phase-body { border-top: 1px solid var(--border); }
+  .item { display: flex; align-items: flex-start; gap: 12px; padding: .9rem 1.25rem; border-bottom: 1px solid var(--border); transition: background .1s; }
+  .item:last-child { border-bottom: none; }
+  .item:hover { background: #fafaf9; }
+
+  .check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; transition: all .2s; background: var(--surface); }
+  .check:hover { border-color: var(--blue); }
+  .check.done { background: var(--green); border-color: var(--green); }
+  .check.done::after { content: ''; display: block; width: 5px; height: 9px; border: 2px solid #fff; border-top: none; border-left: none; transform: rotate(45deg) translate(-1px,-1px); }
+
+  .item-body { flex: 1; min-width: 0; }
+  .item-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+  .item-name { font-size: 14px; font-weight: 500; }
+  .item-name.done { text-decoration: line-through; color: var(--text3); }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .tag-cert { background: var(--blue-light); color: var(--blue); }
+  .tag-skill { background: #f0eeff; color: #4a3f9f; }
+  .tag-free { background: var(--green-light); color: var(--green); }
+  .tag-paid { background: var(--amber-light); color: var(--amber); }
+  .item-desc { font-size: 13px; color: var(--text2); line-height: 1.55; }
+  .item-foot { display: flex; align-items: center; gap: 16px; margin-top: 6px; flex-wrap: wrap; }
+  .item-meta { font-size: 12px; color: var(--text3); }
+  .item-actions { display: flex; gap: 6px; margin-left: auto; }
+  .icon-btn { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 14px; padding: 2px 6px; border-radius: 4px; transition: all .15s; }
+  .icon-btn:hover { background: var(--bg); color: var(--text); }
+
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 200; align-items: center; justify-content: center; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius); padding: 1.75rem; width: 100%; max-width: 520px; margin: 1rem; }
+  .modal h2 { font-size: 18px; font-weight: 600; margin-bottom: 1.25rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 5px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--surface);
+    transition: border-color .15s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--blue); }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.5rem; }
+
+  .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--text); color: #fff; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 13px; z-index: 300; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--text3); font-size: 14px; }
+
+  .loading-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 400; font-size: 14px; color: var(--text2); gap: 10px; }
+  .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 600px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .topbar { padding: 0 1rem; }
+    .page { padding: 1.5rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loader">
+  <div class="spinner"></div> Cargando plan...
+</div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="logo">Luis — Canada Career</span>
+    <a href="index.html" class="nav-link active">Plan de estudios</a>
+    <a href="analyzer.html" class="nav-link">Analizador de ofertas</a>
+  </div>
+</div>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Plan de estudios</div>
+    <div class="page-sub">Certificaciones y habilidades para el mercado canadiense</div>
+  </div>
+
+  <div class="metrics" id="metrics"></div>
+
+  <div class="toolbar">
+    <div class="filters" id="filters">
+      <button class="filter active" data-filter="all">Todos</button>
+      <button class="filter" data-filter="alta">Alta prioridad</button>
+      <button class="filter" data-filter="media">Media prioridad</button>
+      <button class="filter" data-filter="baja">Baja prioridad</button>
+      <button class="filter" data-filter="done">Completados</button>
+    </div>
+    <button class="btn btn-primary" onclick="openModal()">+ Agregar tema</button>
+  </div>
+
+  <div id="phases"></div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h2 id="modalTitle">Agregar tema</h2>
+    <div class="form-group">
+      <label>Nombre del curso / certificacion</label>
+      <input type="text" id="f-name" placeholder="Ej: Microsoft Dynamics 365 Fundamentals (MB-910)">
+    </div>
+    <div class="form-group">
+      <label>Descripcion</label>
+      <textarea id="f-desc" placeholder="Que cubre, por que es importante para Canada..."></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Fase / categoria</label>
+        <select id="f-phase">
+          <option value="ph1">Fase 1 — Microsoft stack</option>
+          <option value="ph2">Fase 2 — SQL y migracion</option>
+          <option value="ph3">Fase 3 — Cloud y ETL</option>
+          <option value="ph4">Fase 4 — CRM platforms</option>
+          <option value="ph5">Fase 5 — APIs</option>
+          <option value="ph6">Fase 6 — Power BI avanzado</option>
+          <option value="ph7">Fase 7 — Perfil profesional</option>
+          <option value="ph8">Fase 8 — Otros</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Prioridad</label>
+        <select id="f-priority">
+          <option value="alta">Alta</option>
+          <option value="media">Media</option>
+          <option value="baja">Baja</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="f-type">
+          <option value="cert">Certificacion</option>
+          <option value="skill">Habilidad / Curso</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Costo</label>
+        <select id="f-cost">
+          <option value="free">Gratuito</option>
+          <option value="paid">De pago</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Plataforma</label>
+        <input type="text" id="f-platform" placeholder="Microsoft Learn, Coursera...">
+      </div>
+      <div class="form-group">
+        <label>Tiempo estimado</label>
+        <input type="text" id="f-time" placeholder="Ej: 15-20 hrs">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveItem()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://eelgwbucnrqpuhivygde.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlbGd3YnVjbnJxcHVoaXZ5Z2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMzU2NTcsImV4cCI6MjA4OTgxMTY1N30.Bi3E9f2HZfrlohC_NP6BGNYlppusH2YJvhBfdk6dT1U';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const PHASES_META = {
+  ph1: { name:'Fase 1', title:'Fundamentos Microsoft — stack core', priority:'alta', duration:'4-6 semanas' },
+  ph2: { name:'Fase 2', title:'SQL avanzado y migracion de datos', priority:'alta', duration:'3-4 semanas' },
+  ph3: { name:'Fase 3', title:'Cloud y ETL — Azure ecosystem', priority:'alta', duration:'4-5 semanas' },
+  ph4: { name:'Fase 4', title:'CRM platforms — Salesforce y Dynamics', priority:'media', duration:'3-4 semanas' },
+  ph5: { name:'Fase 5', title:'APIs e integraciones', priority:'media', duration:'2-3 semanas' },
+  ph6: { name:'Fase 6', title:'Power BI avanzado y visualizacion', priority:'media', duration:'2-3 semanas' },
+  ph7: { name:'Fase 7', title:'Perfil profesional y presencia canadiense', priority:'baja', duration:'Continuo' },
+  ph8: { name:'Fase 8', title:'Otros temas', priority:'media', duration:'' },
+};
+
+const DEFAULT_ITEMS = [
+  {phase_id:'ph1',item_id:'i1',item_name:'Microsoft Dynamics 365 Fundamentals (MB-910)',item_type:'cert',item_cost:'free',item_platform:'Microsoft Learn',item_time:'15-20 hrs',item_desc:'Certificacion oficial de Microsoft. Core del stack que usan empresas como Mission Impact Partners. Gratis en Microsoft Learn.',done:false},
+  {phase_id:'ph1',item_id:'i2',item_name:'Microsoft Power Platform Fundamentals (PL-900)',item_type:'cert',item_cost:'free',item_platform:'Microsoft Learn',item_time:'10-15 hrs',item_desc:'Fundamentos de Power Apps, Power Automate y Power BI como ecosistema. Muy valorado en roles de Data Analyst en Canada.',done:false},
+  {phase_id:'ph1',item_id:'i3',item_name:'Microsoft Fabric Analytics Engineer (DP-600)',item_type:'cert',item_cost:'free',item_platform:'Microsoft Learn',item_time:'40-50 hrs',item_desc:'Mencionado explicitamente en el job posting de MIP. Cubre lakehouses, dataflows y notebooks.',done:false},
+  {phase_id:'ph2',item_id:'i4',item_name:'Advanced SQL for Data Scientists',item_type:'skill',item_cost:'free',item_platform:'Mode Analytics / SQLZoo',item_time:'10-15 hrs',item_desc:'Profiling de datasets, extraccion y validacion de datos en migraciones. Clave para roles de Data Analyst en consulting.',done:false},
+  {phase_id:'ph2',item_id:'i5',item_name:'Data Migration & Integration fundamentals',item_type:'skill',item_cost:'free',item_platform:'YouTube / Microsoft Docs',item_time:'8-10 hrs',item_desc:'Field-level mapping, transformation rules, validacion de datos en migraciones de CRM.',done:false},
+  {phase_id:'ph2',item_id:'i6',item_name:'Azure SQL & SQL Server basics',item_type:'skill',item_cost:'free',item_platform:'Microsoft Learn',item_time:'10 hrs',item_desc:'El mercado canadiense usa Azure SQL extensivamente. Refuerza queries de extraccion y validacion.',done:false},
+  {phase_id:'ph3',item_id:'i7',item_name:'Azure Data Factory (ADF) — hands on',item_type:'skill',item_cost:'free',item_platform:'Microsoft Learn',item_time:'20-25 hrs',item_desc:'Herramienta ETL mas usada en el ecosistema Azure. Mencionada en ofertas de Data Analyst en Canada.',done:false},
+  {phase_id:'ph3',item_id:'i8',item_name:'Microsoft Azure Data Engineer (DP-203)',item_type:'cert',item_cost:'paid',item_platform:'Microsoft Learn + Exam',item_time:'60-80 hrs',item_desc:'Certificacion intermedia de Azure para data engineering. Muy valorada en el mercado canadiense.',done:false},
+  {phase_id:'ph3',item_id:'i9',item_name:'Python para Data Engineering',item_type:'skill',item_cost:'free',item_platform:'Kaggle / DataCamp',item_time:'15-20 hrs',item_desc:'Refuerza Python aplicado a ETL, manipulacion de datos con pandas y automatizacion de pipelines.',done:false},
+  {phase_id:'ph4',item_id:'i10',item_name:'Salesforce Associate Certification',item_type:'cert',item_cost:'free',item_platform:'Salesforce Trailhead',item_time:'20-30 hrs',item_desc:'Gratuito en Trailhead. Salesforce es el otro CRM dominante en Canada junto a Dynamics.',done:false},
+  {phase_id:'ph4',item_id:'i11',item_name:'Dynamics 365 Customer Engagement (MB-210)',item_type:'cert',item_cost:'paid',item_platform:'Microsoft Learn',item_time:'30-40 hrs',item_desc:'Certificacion de Dynamics 365 para ventas y CRM. Profundiza en la estructura de datos de Dynamics.',done:false},
+  {phase_id:'ph4',item_id:'i12',item_name:'HubSpot Data Management & Reporting',item_type:'cert',item_cost:'free',item_platform:'HubSpot Academy',item_time:'5-8 hrs',item_desc:'Certificacion gratuita. HubSpot es el CRM de muchas startups canadienses.',done:false},
+  {phase_id:'ph5',item_id:'i13',item_name:'API integration patterns — REST & OAuth',item_type:'skill',item_cost:'free',item_platform:'Postman Learning Center',item_time:'8-10 hrs',item_desc:'Authentication flows, payload structures, manejo de errores en integraciones.',done:false},
+  {phase_id:'ph5',item_id:'i14',item_name:'Postman API Fundamentals Student Expert',item_type:'cert',item_cost:'free',item_platform:'Postman Academy',item_time:'5-8 hrs',item_desc:'Certificacion gratuita de Postman. Demuestra dominio practico de APIs.',done:false},
+  {phase_id:'ph6',item_id:'i15',item_name:'Microsoft Power BI Data Analyst (PL-300)',item_type:'cert',item_cost:'paid',item_platform:'Microsoft Learn',item_time:'40-50 hrs',item_desc:'Certificacion oficial de Power BI. Valida tu experiencia actual con credencial reconocida en Canada.',done:false},
+  {phase_id:'ph6',item_id:'i16',item_name:'DAX avanzado para Power BI',item_type:'skill',item_cost:'free',item_platform:'SQLBI / YouTube',item_time:'10-15 hrs',item_desc:'DAX es el lenguaje de medidas de Power BI. Dominar DAX avanzado diferencia a un analista senior.',done:false},
+  {phase_id:'ph7',item_id:'i17',item_name:'Construir portfolio en GitHub con data mapping samples',item_type:'skill',item_cost:'free',item_platform:'GitHub',item_time:'10-15 hrs',item_desc:'Crea 2-3 proyectos publicos con field-level mapping, validacion de datos y dashboards Power BI.',done:false},
+  {phase_id:'ph7',item_id:'i18',item_name:'Optimizar LinkedIn para mercado canadiense',item_type:'skill',item_cost:'free',item_platform:'LinkedIn',item_time:'3-5 hrs',item_desc:'Agregar certificaciones, incluir "Eligible under Peru-Canada FTA", conectar con recruiters canadienses.',done:false},
+  {phase_id:'ph7',item_id:'i19',item_name:'Unirse a comunidades de datos en Canada',item_type:'skill',item_cost:'free',item_platform:'Meetup / LinkedIn Groups',item_time:'Continuo',item_desc:'Data & Analytics Toronto, Vancouver Data Junkies, Power BI User Groups Canada.',done:false},
+];
+
+let items = [];
+let currentFilter = 'all';
+let editingId = null;
+let openPhases = {};
+
+async function init() {
+  const { data, error } = await db.from('study_plan').select('*').order('created_at');
+  if (error || !data || data.length === 0) {
+    await seedDefaults();
+  } else {
+    items = data;
+  }
+  document.getElementById('loader').style.display = 'none';
+  render();
+}
+
+async function seedDefaults() {
+  const rows = DEFAULT_ITEMS.map(it => {
+    const meta = PHASES_META[it.phase_id];
+    return { ...it, phase_name: meta.name, phase_title: meta.title, priority: meta.priority, duration: meta.duration };
+  });
+  const { data } = await db.from('study_plan').insert(rows).select();
+  items = data || rows;
+}
+
+function groupByPhase() {
+  const groups = {};
+  items.forEach(it => {
+    if (!groups[it.phase_id]) groups[it.phase_id] = [];
+    groups[it.phase_id].push(it);
+  });
+  return groups;
+}
+
+function render() {
+  const total = items.length;
+  const done = items.filter(i => i.done).length;
+  const certs = items.filter(i => i.item_type === 'cert').length;
+  const certsDone = items.filter(i => i.item_type === 'cert' && i.done).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric">
+      <div class="metric-label">Progreso general</div>
+      <div class="metric-val">${pct}%</div>
+      <div class="metric-bar"><div class="metric-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Completados</div>
+      <div class="metric-val">${done} / ${total}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Certificaciones</div>
+      <div class="metric-val">${certsDone} / ${certs}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">En progreso</div>
+      <div class="metric-val">${total - done}</div>
+    </div>
+  `;
+
+  const groups = groupByPhase();
+  const phaseOrder = ['ph1','ph2','ph3','ph4','ph5','ph6','ph7','ph8'];
+  let html = '';
+
+  phaseOrder.forEach(phId => {
+    const phItems = groups[phId];
+    if (!phItems || phItems.length === 0) return;
+
+    const filtered = phItems.filter(it => {
+      if (currentFilter === 'all') return true;
+      if (currentFilter === 'done') return it.done;
+      return it.priority === currentFilter;
+    });
+    if (filtered.length === 0) return;
+
+    const meta = PHASES_META[phId] || { name: phId, title: '', priority: 'media' };
+    const phDone = phItems.filter(i => i.done).length;
+    const isOpen = openPhases[phId] !== false;
+
+    const badgeClass = { alta:'badge-alta', media:'badge-media', baja:'badge-baja' }[meta.priority] || 'badge-media';
+
+    const itemsHtml = filtered.map(it => `
+      <div class="item" id="item-${it.id}">
+        <div class="check ${it.done ? 'done' : ''}" onclick="toggleDone('${it.id}', ${it.done})"></div>
+        <div class="item-body">
+          <div class="item-top">
+            <span class="item-name ${it.done ? 'done' : ''}">${it.item_name}</span>
+            <span class="tag ${it.item_type === 'cert' ? 'tag-cert' : 'tag-skill'}">${it.item_type === 'cert' ? 'Certificacion' : 'Habilidad'}</span>
+            <span class="tag ${it.item_cost === 'free' ? 'tag-free' : 'tag-paid'}">${it.item_cost === 'free' ? 'Gratis' : 'De pago'}</span>
+          </div>
+          <div class="item-desc">${it.item_desc}</div>
+          <div class="item-foot">
+            <span class="item-meta">${it.item_platform}</span>
+            <span class="item-meta">${it.item_time}</span>
+            <div class="item-actions">
+              <button class="icon-btn" onclick="openModal('${it.id}')" title="Editar">✏️</button>
+              <button class="icon-btn btn-danger" onclick="deleteItem('${it.id}')" title="Eliminar">🗑</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    html += `
+      <div class="phase">
+        <div class="phase-header" onclick="togglePhase('${phId}')">
+          <span class="phase-badge ${badgeClass}">${meta.name}</span>
+          <span class="phase-title">${meta.title || phItems[0]?.phase_title || ''}</span>
+          <span class="phase-meta">${phDone}/${phItems.length} completados</span>
+          <span class="phase-arrow ${isOpen ? 'open' : ''}" id="arrow-${phId}">▼</span>
+        </div>
+        <div class="phase-body" id="body-${phId}" style="display:${isOpen ? 'block' : 'none'}">
+          ${itemsHtml}
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('phases').innerHTML = html || '<div class="empty">No hay temas en esta categoria.</div>';
+}
+
+function togglePhase(phId) {
+  openPhases[phId] = openPhases[phId] === false;
+  const body = document.getElementById('body-' + phId);
+  const arrow = document.getElementById('arrow-' + phId);
+  if (body) body.style.display = openPhases[phId] === false ? 'none' : 'block';
+  if (arrow) arrow.classList.toggle('open', openPhases[phId] !== false);
+}
+
+async function toggleDone(id, currentDone) {
+  const newDone = !currentDone;
+  await db.from('study_plan').update({ done: newDone }).eq('id', id);
+  items = items.map(it => it.id === id ? { ...it, done: newDone } : it);
+  render();
+  showToast(newDone ? 'Marcado como completado' : 'Marcado como pendiente');
+}
+
+async function deleteItem(id) {
+  if (!confirm('Eliminar este tema del plan?')) return;
+  await db.from('study_plan').delete().eq('id', id);
+  items = items.filter(it => it.id !== id);
+  render();
+  showToast('Tema eliminado');
+}
+
+function openModal(id) {
+  editingId = id || null;
+  document.getElementById('modalTitle').textContent = id ? 'Editar tema' : 'Agregar tema';
+  if (id) {
+    const it = items.find(i => i.id === id);
+    if (it) {
+      document.getElementById('f-name').value = it.item_name;
+      document.getElementById('f-desc').value = it.item_desc;
+      document.getElementById('f-phase').value = it.phase_id;
+      document.getElementById('f-priority').value = it.priority;
+      document.getElementById('f-type').value = it.item_type;
+      document.getElementById('f-cost').value = it.item_cost;
+      document.getElementById('f-platform').value = it.item_platform;
+      document.getElementById('f-time').value = it.item_time;
+    }
+  } else {
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-desc').value = '';
+    document.getElementById('f-phase').value = 'ph1';
+    document.getElementById('f-priority').value = 'alta';
+    document.getElementById('f-type').value = 'cert';
+    document.getElementById('f-cost').value = 'free';
+    document.getElementById('f-platform').value = '';
+    document.getElementById('f-time').value = '';
+  }
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('open');
+  editingId = null;
+}
+
+async function saveItem() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { alert('El nombre es obligatorio'); return; }
+
+  const phaseId = document.getElementById('f-phase').value;
+  const meta = PHASES_META[phaseId];
+
+  const row = {
+    phase_id: phaseId,
+    phase_name: meta.name,
+    phase_title: meta.title,
+    priority: document.getElementById('f-priority').value,
+    duration: meta.duration,
+    item_id: editingId || ('i' + Date.now()),
+    item_name: name,
+    item_type: document.getElementById('f-type').value,
+    item_cost: document.getElementById('f-cost').value,
+    item_platform: document.getElementById('f-platform').value,
+    item_time: document.getElementById('f-time').value,
+    item_desc: document.getElementById('f-desc').value,
+    done: false,
+  };
+
+  if (editingId) {
+    await db.from('study_plan').update(row).eq('id', editingId);
+    items = items.map(it => it.id === editingId ? { ...it, ...row } : it);
+    showToast('Tema actualizado');
+  } else {
+    const { data } = await db.from('study_plan').insert(row).select();
+    if (data) items.push(data[0]);
+    showToast('Tema agregado al plan');
+  }
+
+  closeModal();
+  render();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+document.getElementById('filters').addEventListener('click', e => {
+  if (e.target.classList.contains('filter')) {
+    document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
+    e.target.classList.add('active');
+    currentFilter = e.target.dataset.filter;
+    render();
+  }
+});
+
+document.getElementById('modalBg').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalBg')) closeModal();
+});
+
+init();
+</script>
+</body>
+</html>

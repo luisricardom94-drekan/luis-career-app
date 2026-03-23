@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analizador de Ofertas — Luis Martinez</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --border: #e8e5e0;
+    --text: #1a1917;
+    --text2: #6b6860;
+    --text3: #9e9b96;
+    --blue: #1F4E79;
+    --blue-light: #e8f0f8;
+    --green: #2d6a2d;
+    --green-light: #eaf3ea;
+    --amber: #7a4f00;
+    --amber-light: #fef3e2;
+    --red: #8b1a1a;
+    --red-light: #fdecea;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; }
+
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; height: 60px; position: sticky; top: 0; z-index: 100; gap: 16px; }
+  .logo { font-size: 16px; font-weight: 600; color: var(--blue); letter-spacing: -.3px; }
+  .nav-link { font-size: 14px; color: var(--text2); text-decoration: none; padding: 6px 12px; border-radius: var(--radius-sm); transition: background .15s; }
+  .nav-link:hover { background: var(--bg); color: var(--text); }
+  .nav-link.active { background: var(--blue-light); color: var(--blue); font-weight: 500; }
+
+  .layout { display: grid; grid-template-columns: 380px 1fr; gap: 0; min-height: calc(100vh - 60px); }
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 1.5rem; overflow-y: auto; }
+  .main { padding: 1.5rem; overflow-y: auto; }
+
+  .section-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text3); margin-bottom: .75rem; }
+
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 5px; }
+  .form-group textarea, .form-group select {
+    width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--surface);
+    transition: border-color .15s;
+  }
+  .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--blue); }
+  .form-group textarea { resize: vertical; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; font-weight: 500; transition: all .15s; width: 100%; }
+  .btn:hover { background: var(--bg); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .btn-primary:hover:not(:disabled) { background: #185a8d; }
+  .btn-green { background: var(--green); color: #fff; border-color: var(--green); }
+  .btn-green:hover { background: #245924; }
+
+  .history-item { padding: .75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: .5rem; cursor: pointer; transition: all .15s; }
+  .history-item:hover { background: var(--bg); border-color: var(--blue); }
+  .history-item.active { border-color: var(--blue); background: var(--blue-light); }
+  .hi-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .hi-meta { font-size: 12px; color: var(--text3); }
+
+  .placeholder { display: flex; align-items: center; justify-content: center; height: 100%; flex-direction: column; gap: 12px; color: var(--text3); }
+  .placeholder-icon { font-size: 40px; }
+  .placeholder-text { font-size: 14px; }
+
+  .result-wrap { display: none; }
+  .result-wrap.show { display: block; }
+
+  .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 1.5rem; }
+  .score-ring { width: 100px; height: 100px; border-radius: 50%; border: 6px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+  .score-num { font-size: 28px; font-weight: 700; line-height: 1; }
+  .score-lbl { font-size: 10px; color: var(--text3); font-weight: 500; text-transform: uppercase; }
+  .score-info { flex: 1; }
+  .score-verdict { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .score-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .75rem; }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 500; }
+  .pill-green { background: var(--green-light); color: var(--green); }
+  .pill-red { background: var(--red-light); color: var(--red); }
+
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+  .tab { padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--text2); border-bottom: 2px solid transparent; margin-bottom: -1px; font-weight: 500; transition: all .15s; background: none; border-left: none; border-right: none; border-top: none; font-family: 'DM Sans', sans-serif; }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .text-block { font-size: 13px; line-height: 1.8; color: var(--text); white-space: pre-wrap; background: var(--bg); border-radius: var(--radius-sm); padding: 1.25rem; border: 1px solid var(--border); max-height: 400px; overflow-y: auto; font-family: 'DM Sans', sans-serif; }
+
+  .rec { display: flex; gap: 10px; padding: .75rem 0; border-bottom: 1px solid var(--border); }
+  .rec:last-child { border-bottom: none; }
+  .rec-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .dot-alta { background: var(--red); }
+  .dot-media { background: var(--amber); }
+  .dot-baja { background: var(--green); }
+  .rec-body { flex: 1; }
+  .rec-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .rec-detail { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+  .dl-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 1rem; }
+
+  .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-box { background: var(--red-light); color: var(--red); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; margin-top: .75rem; display: none; }
+
+  .divider { height: 1px; background: var(--border); margin: 1.25rem 0; }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="logo">Luis — Canada Career</span>
+  <a href="index.html" class="nav-link">Plan de estudios</a>
+  <a href="analyzer.html" class="nav-link active">Analizador de ofertas</a>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="section-title">Nueva analisis</div>
+
+    <div class="form-group">
+      <label>Perfil a usar</label>
+      <select id="profileType">
+        <option value="data">Data / BI Analyst</option>
+        <option value="pm">Project Manager</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Oferta de trabajo completa</label>
+      <textarea id="jobPosting" rows="12" placeholder="Pega aqui el texto completo del job posting: empresa, titulo, descripcion, requisitos..."></textarea>
+    </div>
+
+    <button class="btn btn-primary" id="analyzeBtn" onclick="analyze()">Analizar oferta</button>
+    <div class="error-box" id="errorBox"></div>
+
+    <div class="divider"></div>
+
+    <div class="section-title">Historial</div>
+    <div id="history"><div style="font-size:13px;color:var(--text3)">Sin analisis previos</div></div>
+  </div>
+
+  <div class="main">
+    <div class="placeholder" id="placeholder">
+      <div class="placeholder-icon">📋</div>
+      <div class="placeholder-text">Pega una oferta y haz click en Analizar</div>
+    </div>
+
+    <div class="result-wrap" id="resultWrap">
+      <div class="score-card">
+        <div class="score-ring" id="scoreRing">
+          <span class="score-num" id="scoreNum">—</span>
+          <span class="score-lbl">match</span>
+        </div>
+        <div class="score-info">
+          <div class="score-verdict" id="scoreVerdict"></div>
+          <div class="score-desc" id="scoreDesc"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Skills que coinciden</div>
+        <div class="pills" id="skillsMatch"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Skills a reforzar o adquirir</div>
+        <div class="pills" id="skillsGap"></div>
+      </div>
+
+      <div class="card">
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('cv')">CV adaptado</button>
+          <button class="tab" onclick="switchTab('cover')">Cover letter</button>
+          <button class="tab" onclick="switchTab('recs')">Recomendaciones</button>
+        </div>
+        <div class="tab-content active" id="tab-cv">
+          <div class="text-block" id="cvContent"></div>
+          <div class="dl-btns">
+            <button class="btn btn-green" onclick="downloadWord('cv')">Descargar CV (.docx)</button>
+            <button class="btn" onclick="copyText('cvContent')">Copiar texto</button>
+          </div>
+        </div>
+        <div class="tab-content" id="tab-cover">
+          <div class="text-block" id="coverContent"></div>
+          <div class="dl-btns">
+            <button class="btn btn-green" onclick="downloadWord('cover')">Descargar Cover Letter (.docx)</button>
+            <button class="btn" onclick="copyText('coverContent')">Copiar texto</button>
+          </div>
+        </div>
+        <div class="tab-content" id="tab-recs">
+          <div id="recsContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://eelgwbucnrqpuhivygde.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlbGd3YnVjbnJxcHVoaXZ5Z2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMzU2NTcsImV4cCI6MjA4OTgxMTY1N30.Bi3E9f2HZfrlohC_NP6BGNYlppusH2YJvhBfdk6dT1U';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentResult = null;
+
+const PROFILES = {
+  data: {
+    name:"Luis Ricardo Martinez Tobalina",
+    title:"Data Analyst | BI Analyst | Information Systems Engineer",
+    contact:"Lima, Peru | Open to relocation to Canada | Eligible under Peru-Canada FTA | +51 941 366 887 | luis.ricardo.martinez.94@gmail.com | linkedin.com/in/luisricardomartinezt",
+    summary:"Results-driven Data Analyst and BI Specialist with 9+ years of experience in consulting, banking, and retail. Specialized in ETL, BI, and data visualization. Power BI, SQL, Python, DAX, Diligent. WES Canadian equivalency: Bachelor's degree (four years). IELTS 7.0 (C1).",
+    skills:["SQL","Python","ETL","Power BI","Tableau","DAX","Excel Advanced","Data Modeling","Data Governance","KPI Dashboards","Diligent ACL Analytics","Diligent Robotics","VBA Macros","Agile","Scrum","Project Management"],
+    experience:[
+      {title:"Data & Automation Analyst (Freelance)",company:"Software & Consulting",period:"Jan 2026 – Present",bullets:["Freelance data analytics and automation consulting, delivering BI solutions and automated reporting.","Develop Power BI dashboards and ETL workflows for client needs."]},
+      {title:"Project Manager",company:"Software & Consulting",period:"Jun 2023 – Dec 2025",bullets:["Led automated audit solutions for 15+ clients, cutting audit time 40%, improving accuracy 75%.","90% client satisfaction rate on data-driven projects.","Trained 500+ professionals on Diligent tools.","Improved operational efficiency 30% through streamlined data processes."]},
+      {title:"Senior Data & BI Consultant",company:"Software & Consulting",period:"Aug 2019 – Jun 2023",bullets:["Expert consultancy on Diligent tools (ACL Analytics, Robotics, GRC), adoption up 20%.","Reduced client support inquiries 50% via documentation."]},
+      {title:"Information Analyst",company:"Interbank",period:"Feb 2018 – Aug 2019",bullets:["Automated financial reports, reducing manual effort 50%.","Power BI dashboards for real-time KPI monitoring, decision efficiency up 30%.","ETL processes improving operational reporting 40%."]},
+      {title:"Strategic Analyst",company:"Cencosud",period:"Jun 2017 – Dec 2017",bullets:["Automated inventory/sales reporting, reducing manual effort 60%.","Excel macros boosting team productivity 35%."]}
+    ],
+    education:"Bachelor of Information Systems Engineering | UPC, Peru | WES: Bachelor's degree (four years) | ECA# 6940766IMM",
+    certs:"IELTS General Training 7.0 C1 (L:8.5 R:7.0 W:6.0 S:7.0) | Python for Data Analyst (Idat, 2024) | Power BI for Project Control (2023) | BI Analyst (DMC, 2019)"
+  },
+  pm: {
+    name:"Luis Ricardo Martinez Tobalina",
+    title:"Project Manager | Technology & Data Consulting | Information Systems Engineer",
+    contact:"Lima, Peru | Open to relocation to Canada | Eligible under Peru-Canada FTA | +51 941 366 887 | luis.ricardo.martinez.94@gmail.com | linkedin.com/in/luisricardomartinezt",
+    summary:"Results-oriented Project Manager with 9+ years leading technology and data consulting projects. 90% client satisfaction. Expert in Agile, Scrum, stakeholder management. WES Canadian equivalency: Bachelor's degree (four years). IELTS 7.0 (C1).",
+    skills:["Project Planning","Scope & Risk Management","Agile","Scrum","Stakeholder Management","Budget Control","Cross-functional Team Leadership","Client Relationship Management","Power BI","SQL","Python","ETL","Diligent ACL Analytics"],
+    experience:[
+      {title:"Independent Project Manager & Consultant (Freelance)",company:"Software & Consulting",period:"Jan 2026 – Present",bullets:["Manage end-to-end project lifecycle for automation and BI engagements.","Requirements gathering, delivery planning, and client communications."]},
+      {title:"Project Manager",company:"Software & Consulting",period:"Jun 2023 – Dec 2025",bullets:["Led audit automation for 15+ clients, cutting time 40%, improving accuracy 75%.","90% client satisfaction managing full project delivery.","Coordinated cross-functional teams improving efficiency 30%."]},
+      {title:"Senior Consultant — Audit Automation & BI",company:"Software & Consulting",period:"Aug 2019 – Jun 2023",bullets:["Managed Diligent tool implementations, adoption up 20%.","Grew repeat business 25% through long-term partnerships."]},
+      {title:"Information Analyst",company:"Interbank",period:"Feb 2018 – Aug 2019",bullets:["Managed reporting automation, reducing manual effort 50%.","Coordinated teams to automate budgeting, improving forecast accuracy 15%."]},
+      {title:"Strategic Analyst",company:"Cencosud",period:"Jun 2017 – Dec 2017",bullets:["Led inventory/sales reporting automation reducing effort 60%."]}
+    ],
+    education:"Bachelor of Information Systems Engineering | UPC, Peru | WES: Bachelor's degree (four years) | ECA# 6940766IMM",
+    certs:"IELTS General Training 7.0 C1 (L:8.5 R:7.0 W:6.0 S:7.0) | Python for Data Analyst (Idat, 2024) | Power BI for Project Control (2023)"
+  }
+};
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['cv','cover','recs'][i] === tab);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+function copyText(id) {
+  navigator.clipboard.writeText(document.getElementById(id).innerText).catch(()=>{});
+}
+
+async function analyze() {
+  const job = document.getElementById('jobPosting').value.trim();
+  if (job.length < 50) { showError('Pega el texto completo del job posting.'); return; }
+
+  const profileType = document.getElementById('profileType').value;
+  const p = PROFILES[profileType];
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Analizando...';
+  document.getElementById('errorBox').style.display = 'none';
+
+  const expText = p.experience.map(e => `${e.title} at ${e.company} (${e.period}): ${e.bullets.join(' ')}`).join('\n');
+
+  const prompt = `You are a Canadian recruitment consultant. Analyze the match and produce a tailored application package.
+
+CANDIDATE:
+Name: ${p.name} | Title: ${p.title}
+Contact: ${p.contact}
+Summary: ${p.summary}
+Skills: ${p.skills.join(', ')}
+Experience: ${expText}
+Education: ${p.education}
+Certifications: ${p.certs}
+
+JOB POSTING:
+${job.substring(0, 2500)}
+
+Return ONLY valid JSON (no markdown, no code fences):
+{"score":85,"verdict":"Highly competitive profile","scoreDesc":"2-3 sentence explanation.","jobTitle":"Job title from posting","company":"Company name","skillsMatch":["skill1"],"skillsGap":["gap1"],"adaptedCV":"Full plain text CV reordered for this job. Keep all real data.","coverLetter":"Professional cover letter. Mention Peru-Canada FTA eligibility positively.","recommendations":[{"priority":"alta","title":"Short title","detail":"Actionable detail"}]}`;
+
+  try {
+    const resp = await fetch('/.netlify/functions/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
+    });
+
+    if (!resp.ok) throw new Error('Error del servidor: ' + resp.status);
+    const data = await resp.json();
+    const raw = data.content.map(i => i.text || '').join('').trim();
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('Respuesta inesperada de la IA');
+    const result = JSON.parse(match[0]);
+
+    await saveAnalysis(result, job, profileType);
+    renderResult(result);
+    loadHistory();
+  } catch(e) {
+    showError('Error: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Analizar oferta';
+  }
+}
+
+async function saveAnalysis(r, jobPosting, profileType) {
+  await db.from('job_analyses').insert({
+    job_title: r.jobTitle || 'Puesto sin titulo',
+    company: r.company || 'Empresa sin nombre',
+    job_posting: jobPosting.substring(0, 3000),
+    profile_type: profileType,
+    score: r.score,
+    verdict: r.verdict,
+    score_desc: r.scoreDesc,
+    skills_match: r.skillsMatch,
+    skills_gap: r.skillsGap,
+    adapted_cv: r.adaptedCV,
+    cover_letter: r.coverLetter,
+    recommendations: r.recommendations,
+  });
+}
+
+function renderResult(r) {
+  currentResult = r;
+  const score = Math.min(100, Math.max(0, Math.round(r.score)));
+  const color = score >= 75 ? '#2d6a2d' : score >= 55 ? '#7a4f00' : '#8b1a1a';
+  const ring = document.getElementById('scoreRing');
+  ring.style.borderColor = color;
+  document.getElementById('scoreNum').textContent = score + '%';
+  document.getElementById('scoreNum').style.color = color;
+  document.getElementById('scoreVerdict').textContent = r.verdict || '';
+  document.getElementById('scoreDesc').textContent = r.scoreDesc || '';
+
+  document.getElementById('skillsMatch').innerHTML = (r.skillsMatch||[]).map(s =>
+    `<span class="pill pill-green">${s}</span>`).join('');
+  document.getElementById('skillsGap').innerHTML = (r.skillsGap||[]).length
+    ? (r.skillsGap).map(s => `<span class="pill pill-red">${s}</span>`).join('')
+    : '<span class="pill pill-green">Sin brechas criticas</span>';
+
+  document.getElementById('cvContent').textContent = r.adaptedCV || '';
+  document.getElementById('coverContent').textContent = r.coverLetter || '';
+
+  const dotClass = {alta:'dot-alta', media:'dot-media', baja:'dot-baja'};
+  document.getElementById('recsContent').innerHTML = (r.recommendations||[]).map(rec =>
+    `<div class="rec">
+      <div class="rec-dot ${dotClass[rec.priority]||'dot-media'}"></div>
+      <div class="rec-body">
+        <div class="rec-title">${rec.title}</div>
+        <div class="rec-detail">${rec.detail}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('placeholder').style.display = 'none';
+  document.getElementById('resultWrap').classList.add('show');
+  switchTab('cv');
+}
+
+async function loadHistory() {
+  const { data } = await db.from('job_analyses').select('*').order('created_at', { ascending: false }).limit(20);
+  if (!data || data.length === 0) return;
+  document.getElementById('history').innerHTML = data.map(row => `
+    <div class="history-item" onclick="loadAnalysis('${row.id}')">
+      <div class="hi-title">${row.job_title} — ${row.company}</div>
+      <div class="hi-meta">${row.score}% match · ${new Date(row.created_at).toLocaleDateString('es-PE')}</div>
+    </div>
+  `).join('');
+}
+
+async function loadAnalysis(id) {
+  const { data } = await db.from('job_analyses').select('*').eq('id', id).single();
+  if (!data) return;
+  document.getElementById('jobPosting').value = data.job_posting;
+  document.getElementById('profileType').value = data.profile_type;
+  renderResult({
+    score: data.score, verdict: data.verdict, scoreDesc: data.score_desc,
+    skillsMatch: data.skills_match, skillsGap: data.skills_gap,
+    adaptedCV: data.adapted_cv, coverLetter: data.cover_letter,
+    recommendations: data.recommendations
+  });
+  document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+async function downloadWord(type) {
+  if (!currentResult) return;
+  const { Document, Packer, Paragraph, TextRun, AlignmentType, LevelFormat, BorderStyle, TabStopType, TabStopPosition } = docx;
+
+  const text = type === 'cv' ? currentResult.adaptedCV : currentResult.coverLetter;
+  const filename = type === 'cv' ? 'CV_Luis_Martinez_Canada.docx' : 'CoverLetter_Luis_Martinez.docx';
+
+  const lines = text.split('\n');
+  const children = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const isHeader = line.startsWith('─') || line.toUpperCase() === line && line.trim().length > 3 && !line.startsWith(' ');
+    const isBullet = line.trim().startsWith('•') || line.trim().startsWith('-');
+
+    if (isHeader) {
+      children.push(new Paragraph({
+        spacing: { before: 200, after: 60 },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: '1F4E79', space: 4 } },
+        children: [new TextRun({ text: line.replace(/─/g,'').trim(), bold: true, size: 22, color: '1F4E79', font: 'Calibri' })]
+      }));
+    } else if (isBullet) {
+      children.push(new Paragraph({
+        numbering: { reference: 'bullets', level: 0 },
+        spacing: { before: 40, after: 40 },
+        children: [new TextRun({ text: line.replace(/^[•\-]\s*/, '').trim(), size: 20, font: 'Calibri' })]
+      }));
+    } else if (line.trim() === '' || line.startsWith('─')) {
+      children.push(new Paragraph({ spacing: { before: 60, after: 60 }, children: [new TextRun('')] }));
+    } else {
+      const isBold = i === 0 || (i < 4 && line.includes('|'));
+      children.push(new Paragraph({
+        spacing: { before: 40, after: 40 },
+        children: [new TextRun({ text: line, bold: isBold, size: isBold && i === 0 ? 28 : 20, font: 'Calibri', color: isBold && i === 0 ? '1F4E79' : '000000' })]
+      }));
+    }
+  }
+
+  const doc = new Document({
+    numbering: {
+      config: [{ reference: 'bullets', levels: [{ level: 0, format: LevelFormat.BULLET, text: '•', alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 360, hanging: 200 } } } }] }]
+    },
+    sections: [{
+      properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 900, right: 1080, bottom: 900, left: 1080 } } },
+      children
+    }]
+  });
+
+  const buffer = await Packer.toBuffer(doc);
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorBox');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+loadHistory();
+</script>
+</body>
+</html>
