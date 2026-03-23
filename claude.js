@@ -5,6 +5,13 @@ exports.handler = async (event) => {
 
   try {
     const body = JSON.parse(event.body);
+
+    const payload = {
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 4000,
+      messages: body.messages
+    };
+
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -12,11 +19,7 @@ exports.handler = async (event) => {
         "x-api-key": process.env.ANTHROPIC_API_KEY,
         "anthropic-version": "2023-06-01"
       },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-5",
-        max_tokens: 4000,
-        messages: body.messages
-      })
+      body: JSON.stringify(payload)
     });
 
     const data = await response.json();
@@ -25,7 +28,11 @@ exports.handler = async (event) => {
       return {
         statusCode: response.status,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ error: data.error?.message || "API error" })
+        body: JSON.stringify({
+          error: data.error?.message || "API error",
+          type: data.error?.type || "unknown",
+          full: data
+        })
       };
     }
 
@@ -34,6 +41,7 @@ exports.handler = async (event) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     };
+
   } catch (err) {
     return {
       statusCode: 500,
