@@ -151,7 +151,18 @@
 <script>
 const SUPABASE_URL='https://eelgwbucnrqpuhivygde.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlbGd3YnVjbnJxcHVoaXZ5Z2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMzU2NTcsImV4cCI6MjA4OTgxMTY1N30.Bi3E9f2HZfrlohC_NP6BGNYlppusH2YJvhBfdk6dT1U';
-const ANTHROPIC_KEY='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';
+async function callClaude(prompt) {
+  const resp = await fetch('/.netlify/functions/claude', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
+  });
+  if (!resp.ok) {
+    const e = await resp.json().catch(() => ({}));
+    throw new Error(e.error || 'Error ' + resp.status);
+  }
+  return resp.json();
+}
 const {createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentResult=null;
@@ -193,7 +204,7 @@ Return ONLY JSON no markdown: {"score":85,"verdict":"short verdict","scoreDesc":
   try{
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      headers:{'Content-Type':'application/json','x-api-key':callClaude(prompt),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:prompt}]})
     });
     if(!resp.ok){const e=await resp.json().catch(()=>({}));throw new Error(e.error?.message||'Error '+resp.status)}
