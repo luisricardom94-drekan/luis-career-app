@@ -13,7 +13,7 @@
   body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px}
   .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;height:60px;position:sticky;top:0;z-index:100;gap:16px}
   .logo{font-size:16px;font-weight:600;color:var(--blue);letter-spacing:-.3px}
-  .nav-link{font-size:14px;color:var(--text2);text-decoration:none;padding:6px 12px;border-radius:var(--radius-sm);transition:background .15s}
+  .nav-link{font-size:14px;color:var(--text2);text-decoration:none;padding:6px 12px;border-radius:var(--radius-sm)}
   .nav-link:hover{background:var(--bg);color:var(--text)}
   .nav-link.active{background:var(--blue-light);color:var(--blue);font-weight:500}
   .layout{display:grid;grid-template-columns:380px 1fr;min-height:calc(100vh - 60px)}
@@ -22,31 +22,27 @@
   .section-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:.75rem}
   .form-group{margin-bottom:1rem}
   .form-group label{display:block;font-size:13px;font-weight:500;color:var(--text2);margin-bottom:5px}
-  .form-group textarea,.form-group select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surface);transition:border-color .15s}
+  .form-group textarea,.form-group select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surface)}
   .form-group textarea:focus,.form-group select:focus{outline:none;border-color:var(--blue)}
   .form-group textarea{resize:vertical}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500;transition:all .15s;width:100%}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500;width:100%}
   .btn:hover{background:var(--bg)}
   .btn:disabled{opacity:.5;cursor:not-allowed}
   .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
   .btn-primary:hover:not(:disabled){background:#185a8d}
   .btn-green{background:var(--green);color:#fff;border-color:var(--green)}
-  .btn-green:hover{background:#245924}
-  .history-item{padding:.75rem;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.5rem;cursor:pointer;transition:all .15s}
+  .history-item{padding:.75rem;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.5rem;cursor:pointer}
   .history-item:hover{background:var(--bg);border-color:var(--blue)}
-  .history-item.active{border-color:var(--blue);background:var(--blue-light)}
   .hi-title{font-size:13px;font-weight:500;margin-bottom:2px}
   .hi-meta{font-size:12px;color:var(--text3)}
   .placeholder{display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:12px;color:var(--text3)}
   .placeholder-icon{font-size:40px}
-  .placeholder-text{font-size:14px}
   .result-wrap{display:none}
   .result-wrap.show{display:block}
   .score-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:1.5rem}
   .score-ring{width:100px;height:100px;border-radius:50%;border:6px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
   .score-num{font-size:28px;font-weight:700;line-height:1}
-  .score-lbl{font-size:10px;color:var(--text3);font-weight:500;text-transform:uppercase}
-  .score-info{flex:1}
+  .score-lbl{font-size:10px;color:var(--text3);text-transform:uppercase}
   .score-verdict{font-size:18px;font-weight:600;margin-bottom:6px}
   .score-desc{font-size:13px;color:var(--text2);line-height:1.6}
   .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
@@ -56,22 +52,21 @@
   .pill-green{background:var(--green-light);color:var(--green)}
   .pill-red{background:var(--red-light);color:var(--red)}
   .tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:1rem}
-  .tab{padding:8px 16px;font-size:13px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500;transition:all .15s;background:none;border-left:none;border-right:none;border-top:none;font-family:'DM Sans',sans-serif}
+  .tab{padding:8px 16px;font-size:13px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500;background:none;border-left:none;border-right:none;border-top:none;font-family:'DM Sans',sans-serif}
   .tab.active{color:var(--blue);border-bottom-color:var(--blue)}
   .tab-content{display:none}
   .tab-content.active{display:block}
-  .text-block{font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;background:var(--bg);border-radius:var(--radius-sm);padding:1.25rem;border:1px solid var(--border);max-height:400px;overflow-y:auto;font-family:'DM Sans',sans-serif}
+  .text-block{font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;background:var(--bg);border-radius:var(--radius-sm);padding:1.25rem;border:1px solid var(--border);max-height:400px;overflow-y:auto}
   .rec{display:flex;gap:10px;padding:.75rem 0;border-bottom:1px solid var(--border)}
   .rec:last-child{border-bottom:none}
   .rec-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
   .dot-alta{background:var(--red)}.dot-media{background:var(--amber)}.dot-baja{background:var(--green)}
-  .rec-body{flex:1}
   .rec-title{font-size:13px;font-weight:600;margin-bottom:2px}
   .rec-detail{font-size:13px;color:var(--text2);line-height:1.5}
   .dl-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:1rem}
   .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .error-box{background:var(--red-light);color:var(--red);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;margin-top:.75rem;display:none;line-height:1.5}
+  .error-box{background:var(--red-light);color:var(--red);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;margin-top:.75rem;display:none}
   .divider{height:1px;background:var(--border);margin:1.25rem 0}
   .progress-bar{height:3px;background:var(--blue-light);border-radius:2px;margin-top:.75rem;overflow:hidden;display:none}
   .progress-fill{height:100%;background:var(--blue);border-radius:2px;width:0;transition:width 40s linear}
@@ -110,7 +105,7 @@
   <div class="main">
     <div class="placeholder" id="placeholder">
       <div class="placeholder-icon">📋</div>
-      <div class="placeholder-text">Pega una oferta y haz click en Analizar</div>
+      <div style="font-size:14px;color:var(--text3)">Pega una oferta y haz click en Analizar</div>
     </div>
     <div class="result-wrap" id="resultWrap">
       <div class="score-card">
@@ -118,13 +113,13 @@
           <span class="score-num" id="scoreNum">--</span>
           <span class="score-lbl">match</span>
         </div>
-        <div class="score-info">
+        <div style="flex:1">
           <div class="score-verdict" id="scoreVerdict"></div>
           <div class="score-desc" id="scoreDesc"></div>
         </div>
       </div>
       <div class="card"><div class="card-title">Skills que coinciden</div><div class="pills" id="skillsMatch"></div></div>
-      <div class="card"><div class="card-title">Skills a reforzar o adquirir</div><div class="pills" id="skillsGap"></div></div>
+      <div class="card"><div class="card-title">Skills a reforzar</div><div class="pills" id="skillsGap"></div></div>
       <div class="card">
         <div class="tabs">
           <button class="tab active" onclick="switchTab('cv')">CV adaptado</button>
@@ -159,8 +154,8 @@ const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentResult=null;
 
 const PROFILES={
-  data:{name:"Luis Ricardo Martinez Tobalina",title:"Data Analyst | BI Analyst | Information Systems Engineer",contact:"Lima Peru | Open to relocation to Canada | Eligible under Peru-Canada FTA | luis.ricardo.martinez.94@gmail.com | linkedin.com/in/luisricardomartinezt",summary:"Data Analyst BI Specialist 9+ years consulting banking retail. ETL BI Power BI SQL Python DAX Diligent. WES Canadian equivalency Bachelor degree. IELTS 7.0 C1.",skills:["SQL","Python","ETL","Power BI","Tableau","DAX","Excel","Data Modeling","Data Governance","KPI Dashboards","Diligent ACL","Diligent Robotics","VBA","Agile","Scrum"],experience:[{t:"Data Analyst Freelance",c:"Software & Consulting",p:"Jan 2026-Present",b:["BI and automation consulting. Power BI dashboards and ETL workflows."]},{t:"Project Manager",c:"Software & Consulting",p:"Jun 2023-Dec 2025",b:["Audit automation 15+ clients. Time -40% accuracy +75%. 90% satisfaction. Trained 500+. Efficiency +30%."]},{t:"Senior BI Consultant",c:"Software & Consulting",p:"Aug 2019-Jun 2023",b:["Diligent tools adoption +20%. Support -50%. Repeat business +25%."]},{t:"Information Analyst",c:"Interbank",p:"Feb 2018-Aug 2019",b:["Reports automated -50%. Power BI dashboards +30% efficiency. ETL +40%."]},{t:"Strategic Analyst",c:"Cencosud",p:"Jun 2017-Dec 2017",b:["Reporting automation -60%. Excel macros +35%."]}],education:"Bachelor Information Systems Engineering UPC Peru | WES Bachelor degree four years ECA 6940766IMM",certs:"IELTS 7.0 C1 L8.5 R7.0 W6.0 S7.0 | Python Data Analyst 2024 | Power BI 2023 | BI Analyst DMC 2019"},
-  pm:{name:"Luis Ricardo Martinez Tobalina",title:"Project Manager | Technology & Data Consulting",contact:"Lima Peru | Open to relocation to Canada | Eligible under Peru-Canada FTA | luis.ricardo.martinez.94@gmail.com | linkedin.com/in/luisricardomartinezt",summary:"Project Manager 9+ years technology data consulting. 90% satisfaction. Agile Scrum stakeholder management. WES Canadian equivalency Bachelor degree. IELTS 7.0 C1.",skills:["Project Planning","Risk Management","Agile","Scrum","Stakeholder Management","Cross-functional Leadership","Client Relations","Power BI","SQL","Python","ETL","Diligent"],experience:[{t:"PM Consultant Freelance",c:"Software & Consulting",p:"Jan 2026-Present",b:["End-to-end project management automation and BI."]},{t:"Project Manager",c:"Software & Consulting",p:"Jun 2023-Dec 2025",b:["Audit automation 15+ clients -40% time +75% accuracy. 90% satisfaction. 500+ trained. +30% efficiency."]},{t:"Senior Consultant",c:"Software & Consulting",p:"Aug 2019-Jun 2023",b:["Diligent implementations adoption +20%. Repeat business +25%."]},{t:"Information Analyst",c:"Interbank",p:"Feb 2018-Aug 2019",b:["Automation -50% manual effort. Forecast +15%."]},{t:"Strategic Analyst",c:"Cencosud",p:"Jun 2017-Dec 2017",b:["Reporting automation -60%."]}],education:"Bachelor Information Systems Engineering UPC Peru | WES Bachelor degree four years ECA 6940766IMM",certs:"IELTS 7.0 C1 | Python Data Analyst 2024 | Power BI 2023"}
+  data:{name:"Luis Ricardo Martinez Tobalina",title:"Data Analyst | BI Analyst | Information Systems Engineer",contact:"Lima Peru | Open to relocation to Canada | Eligible under Peru-Canada FTA | luis.ricardo.martinez.94@gmail.com | linkedin.com/in/luisricardomartinezt",summary:"Data Analyst BI Specialist 9+ years consulting banking retail. ETL BI Power BI SQL Python DAX Diligent. WES Canadian equivalency Bachelor degree. IELTS 7.0 C1.",skills:["SQL","Python","ETL","Power BI","Tableau","DAX","Excel","Data Modeling","Data Governance","KPI Dashboards","Diligent ACL","Diligent Robotics","VBA","Agile","Scrum"],experience:[{t:"Data Analyst Freelance",c:"Software & Consulting",p:"Jan 2026-Present",b:["BI and automation consulting. Power BI dashboards and ETL workflows."]},{t:"Project Manager",c:"Software & Consulting",p:"Jun 2023-Dec 2025",b:["Audit automation 15+ clients. Time -40% accuracy +75%. 90% satisfaction. Trained 500+. Efficiency +30%."]},{t:"Senior BI Consultant",c:"Software & Consulting",p:"Aug 2019-Jun 2023",b:["Diligent tools adoption +20%. Support -50%. Repeat business +25%."]},{t:"Information Analyst",c:"Interbank",p:"Feb 2018-Aug 2019",b:["Reports automated -50%. Power BI +30% efficiency. ETL +40%."]},{t:"Strategic Analyst",c:"Cencosud",p:"Jun 2017-Dec 2017",b:["Reporting -60%. Excel macros +35%."]}],education:"Bachelor Information Systems Engineering UPC Peru | WES Bachelor degree four years ECA 6940766IMM",certs:"IELTS 7.0 C1 L8.5 R7.0 W6.0 S7.0 | Python Data Analyst 2024 | Power BI 2023 | BI Analyst DMC 2019"},
+  pm:{name:"Luis Ricardo Martinez Tobalina",title:"Project Manager | Technology & Data Consulting",contact:"Lima Peru | Open to relocation to Canada | Eligible under Peru-Canada FTA | luis.ricardo.martinez.94@gmail.com | linkedin.com/in/luisricardomartinezt",summary:"Project Manager 9+ years technology data consulting. 90% satisfaction. Agile Scrum stakeholder management. WES Canadian equivalency Bachelor degree. IELTS 7.0 C1.",skills:["Project Planning","Risk Management","Agile","Scrum","Stakeholder Management","Cross-functional Leadership","Client Relations","Power BI","SQL","Python","ETL","Diligent"],experience:[{t:"PM Consultant Freelance",c:"Software & Consulting",p:"Jan 2026-Present",b:["End-to-end project management automation and BI."]},{t:"Project Manager",c:"Software & Consulting",p:"Jun 2023-Dec 2025",b:["Audit automation 15+ clients -40% time +75% accuracy. 90% satisfaction. 500+ trained. +30% efficiency."]},{t:"Senior Consultant",c:"Software & Consulting",p:"Aug 2019-Jun 2023",b:["Diligent implementations adoption +20%. Repeat business +25%."]},{t:"Information Analyst",c:"Interbank",p:"Feb 2018-Aug 2019",b:["Automation -50%. Forecast +15%."]},{t:"Strategic Analyst",c:"Cencosud",p:"Jun 2017-Dec 2017",b:["Reporting -60%."]}],education:"Bachelor Information Systems Engineering UPC Peru | WES Bachelor degree four years ECA 6940766IMM",certs:"IELTS 7.0 C1 | Python Data Analyst 2024 | Power BI 2023"}
 };
 
 function switchTab(t){document.querySelectorAll('.tab').forEach((x,i)=>x.classList.toggle('active',['cv','cover','recs'][i]===t));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active')}
@@ -179,21 +174,24 @@ async function analyze(){
   btn.disabled=true;
   btn.innerHTML='<div class="spinner"></div> Analizando...';
   bar.style.display='block';
-  fill.style.transition='none';
-  fill.style.width='0';
+  fill.style.transition='none';fill.style.width='0';
   setTimeout(()=>{fill.style.transition='width 40s linear';fill.style.width='85%'},50);
   setTimeout(()=>{wake.style.display='block'},5000);
   document.getElementById('errorBox').style.display='none';
 
   const exp=p.experience.map(e=>`${e.t} ${e.c} ${e.p}: ${e.b.join(' ')}`).join(' | ');
-  const prompt=`Canadian recruitment consultant. Analyze job fit and return ONLY valid JSON no markdown no code fences.
-CANDIDATE: ${p.name} | ${p.title} | ${p.contact}
+  const prompt=`You are a Canadian recruitment consultant. Analyze the job fit for this candidate.
+CANDIDATE: ${p.name} | ${p.title}
+Contact: ${p.contact}
 Summary: ${p.summary}
-Skills: ${p.skills.join(',')}
+Skills: ${p.skills.join(', ')}
 Experience: ${exp}
 Education: ${p.education} | ${p.certs}
-JOB: ${job.substring(0,1200)}
-JSON: {"score":85,"verdict":"short verdict","scoreDesc":"2 sentences","jobTitle":"title","company":"company","skillsMatch":["s1","s2"],"skillsGap":["g1","g2"],"adaptedCV":"full plain text CV tailored for this job","coverLetter":"cover letter mentioning Peru-Canada FTA eligibility","recommendations":[{"priority":"alta","title":"t","detail":"d"}]}`;
+JOB POSTING: ${job.substring(0,1000)}
+
+Respond with ONLY a JSON object. No markdown. No code blocks. No extra text before or after.
+Use this exact structure and keep all string values short to avoid JSON errors:
+{"score":75,"verdict":"Competitive profile","scoreDesc":"Short 2 sentence description.","jobTitle":"Job Title","company":"Company Name","skillsMatch":["SQL","Power BI","ETL"],"skillsGap":["Dynamics 365","Azure"],"adaptedCV":"LUIS RICARDO MARTINEZ TOBALINA\\nData Analyst | BI Analyst\\n\\nPROFESSIONAL SUMMARY\\nShort summary tailored to job.\\n\\nSKILLS\\nSQL, Python, Power BI, ETL\\n\\nEXPERIENCE\\nData Analyst Freelance - Software & Consulting (Jan 2026-Present)\\n- BI and automation consulting\\n\\nProject Manager - Software & Consulting (Jun 2023-Dec 2025)\\n- Led audit automation for 15+ clients\\n\\nEDUCATION\\nBachelor Information Systems Engineering - UPC Peru\\nWES: Bachelor degree (four years) ECA 6940766IMM\\n\\nCERTIFICATIONS\\nIELTS 7.0 C1 | Power BI 2023","coverLetter":"Dear Hiring Team,\\n\\nI am writing to apply for this position. With 9+ years in data analytics and BI, I bring strong SQL, Power BI, and ETL expertise. I am eligible to work in Canada under the Peru-Canada FTA.\\n\\nSincerely,\\nLuis Ricardo Martinez Tobalina","recommendations":[{"priority":"alta","title":"Learn Dynamics 365","detail":"Complete MB-910 on Microsoft Learn for free."}]}`;
 
   try{
     const resp=await fetch(API_URL+'/analyze',{
@@ -206,10 +204,10 @@ JSON: {"score":85,"verdict":"short verdict","scoreDesc":"2 sentences","jobTitle"
       throw new Error(e.error||'Error del servidor: '+resp.status);
     }
     const data=await resp.json();
-    if(!data.result)throw new Error(data.error||'Respuesta inesperada');
-    const result=data.result;
-    await saveAnalysis(result,job,pt);
-    renderResult(result);
+    if(data.error)throw new Error(data.error);
+    if(!data.result)throw new Error('Respuesta vacia del servidor');
+    renderResult(data.result);
+    await saveAnalysis(data.result,job,pt);
     loadHistory();
   }catch(e){
     showError('Error: '+e.message);
@@ -217,19 +215,20 @@ JSON: {"score":85,"verdict":"short verdict","scoreDesc":"2 sentences","jobTitle"
     btn.disabled=false;
     btn.innerHTML='Analizar oferta';
     wake.style.display='none';
-    fill.style.transition='width 0.5s';
-    fill.style.width='100%';
-    setTimeout(()=>{bar.style.display='none';fill.style.width='0'},600);
+    fill.style.transition='width 0.3s';fill.style.width='100%';
+    setTimeout(()=>{bar.style.display='none';fill.style.width='0'},400);
   }
 }
 
 async function saveAnalysis(r,jobPosting,profileType){
-  await db.from('job_analyses').insert({job_title:r.jobTitle||'Sin titulo',company:r.company||'Sin empresa',job_posting:jobPosting.substring(0,2000),profile_type:profileType,score:r.score,verdict:r.verdict,score_desc:r.scoreDesc,skills_match:r.skillsMatch,skills_gap:r.skillsGap,adapted_cv:r.adaptedCV,cover_letter:r.coverLetter,recommendations:r.recommendations});
+  try{
+    await db.from('job_analyses').insert({job_title:r.jobTitle||'Sin titulo',company:r.company||'Sin empresa',job_posting:jobPosting.substring(0,2000),profile_type:profileType,score:r.score,verdict:r.verdict,score_desc:r.scoreDesc,skills_match:r.skillsMatch,skills_gap:r.skillsGap,adapted_cv:r.adaptedCV,cover_letter:r.coverLetter,recommendations:r.recommendations});
+  }catch(e){console.error('Save error:',e)}
 }
 
 function renderResult(r){
   currentResult=r;
-  const score=Math.min(100,Math.max(0,Math.round(r.score)));
+  const score=Math.min(100,Math.max(0,Math.round(r.score||70)));
   const color=score>=75?'#2d6a2d':score>=55?'#7a4f00':'#8b1a1a';
   document.getElementById('scoreRing').style.borderColor=color;
   document.getElementById('scoreNum').textContent=score+'%';
@@ -240,24 +239,28 @@ function renderResult(r){
   document.getElementById('skillsGap').innerHTML=(r.skillsGap||[]).length?(r.skillsGap).map(s=>`<span class="pill pill-red">${s}</span>`).join(''):'<span class="pill pill-green">Sin brechas criticas</span>';
   document.getElementById('cvContent').textContent=r.adaptedCV||'';
   document.getElementById('coverContent').textContent=r.coverLetter||'';
-  document.getElementById('recsContent').innerHTML=(r.recommendations||[]).map(rec=>`<div class="rec"><div class="rec-dot dot-${rec.priority||'media'}"></div><div class="rec-body"><div class="rec-title">${rec.title}</div><div class="rec-detail">${rec.detail}</div></div></div>`).join('');
+  document.getElementById('recsContent').innerHTML=(r.recommendations||[]).map(rec=>`<div class="rec"><div class="rec-dot dot-${rec.priority||'media'}"></div><div style="flex:1"><div class="rec-title">${rec.title||''}</div><div class="rec-detail">${rec.detail||''}</div></div></div>`).join('');
   document.getElementById('placeholder').style.display='none';
   document.getElementById('resultWrap').classList.add('show');
   switchTab('cv');
 }
 
 async function loadHistory(){
-  const{data}=await db.from('job_analyses').select('*').order('created_at',{ascending:false}).limit(20);
-  if(!data||!data.length)return;
-  document.getElementById('history').innerHTML=data.map(row=>`<div class="history-item" onclick="loadAnalysis('${row.id}')"><div class="hi-title">${row.job_title} - ${row.company}</div><div class="hi-meta">${row.score}% match · ${new Date(row.created_at).toLocaleDateString('es-PE')}</div></div>`).join('');
+  try{
+    const{data}=await db.from('job_analyses').select('*').order('created_at',{ascending:false}).limit(20);
+    if(!data||!data.length)return;
+    document.getElementById('history').innerHTML=data.map(row=>`<div class="history-item" onclick="loadAnalysis('${row.id}')"><div class="hi-title">${row.job_title} - ${row.company}</div><div class="hi-meta">${row.score}% match · ${new Date(row.created_at).toLocaleDateString('es-PE')}</div></div>`).join('');
+  }catch(e){console.error('History error:',e)}
 }
 
 async function loadAnalysis(id){
-  const{data}=await db.from('job_analyses').select('*').eq('id',id).single();
-  if(!data)return;
-  document.getElementById('jobPosting').value=data.job_posting;
-  document.getElementById('profileType').value=data.profile_type;
-  renderResult({score:data.score,verdict:data.verdict,scoreDesc:data.score_desc,skillsMatch:data.skills_match,skillsGap:data.skills_gap,adaptedCV:data.adapted_cv,coverLetter:data.cover_letter,recommendations:data.recommendations});
+  try{
+    const{data}=await db.from('job_analyses').select('*').eq('id',id).single();
+    if(!data)return;
+    document.getElementById('jobPosting').value=data.job_posting;
+    document.getElementById('profileType').value=data.profile_type;
+    renderResult({score:data.score,verdict:data.verdict,scoreDesc:data.score_desc,skillsMatch:data.skills_match,skillsGap:data.skills_gap,adaptedCV:data.adapted_cv,coverLetter:data.cover_letter,recommendations:data.recommendations});
+  }catch(e){console.error('Load error:',e)}
 }
 
 async function downloadWord(type){
@@ -265,7 +268,7 @@ async function downloadWord(type){
   const{Document,Packer,Paragraph,TextRun,AlignmentType,LevelFormat,BorderStyle}=docx;
   const text=type==='cv'?currentResult.adaptedCV:currentResult.coverLetter;
   const filename=type==='cv'?'CV_Luis_Martinez_Canada.docx':'CoverLetter_Luis_Martinez.docx';
-  const lines=text.split('\n');
+  const lines=(text||'').split('\n');
   const children=[];
   for(let i=0;i<lines.length;i++){
     const line=lines[i];
@@ -273,18 +276,14 @@ async function downloadWord(type){
     const isBullet=/^[*\-•]/.test(line.trim());
     if(isHeader){children.push(new Paragraph({spacing:{before:200,after:60},border:{bottom:{style:BorderStyle.SINGLE,size:6,color:'1F4E79',space:4}},children:[new TextRun({text:line.trim(),bold:true,size:22,color:'1F4E79',font:'Calibri'})]}))}
     else if(isBullet){children.push(new Paragraph({numbering:{reference:'bullets',level:0},spacing:{before:40,after:40},children:[new TextRun({text:line.replace(/^[*\-•]\s*/,'').trim(),size:20,font:'Calibri'})]}))}
-    else if(line.trim()===''){children.push(new Paragraph({spacing:{before:40,after:40},children:[new TextRun('')]}))}
+    else if(line.trim()===''){children.push(new Paragraph({spacing:{before:30,after:30},children:[new TextRun('')]}))}
     else{const bold=i===0||(i<5&&line.includes('|'));children.push(new Paragraph({spacing:{before:40,after:40},children:[new TextRun({text:line,bold:bold,size:bold&&i===0?28:20,font:'Calibri',color:bold&&i===0?'1F4E79':'000000'})]}))}
   }
-  const doc=new Document({
-    numbering:{config:[{reference:'bullets',levels:[{level:0,format:LevelFormat.BULLET,text:'•',alignment:AlignmentType.LEFT,style:{paragraph:{indent:{left:360,hanging:200}}}}]}]},
-    sections:[{properties:{page:{size:{width:12240,height:15840},margin:{top:900,right:1080,bottom:900,left:1080}}},children}]
-  });
+  const doc=new Document({numbering:{config:[{reference:'bullets',levels:[{level:0,format:LevelFormat.BULLET,text:'•',alignment:AlignmentType.LEFT,style:{paragraph:{indent:{left:360,hanging:200}}}}]}]},sections:[{properties:{page:{size:{width:12240,height:15840},margin:{top:900,right:1080,bottom:900,left:1080}}},children}]});
   const buffer=await Packer.toBuffer(doc);
   const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
   const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download=filename;a.click();
+  const a=document.createElement('a');a.href=url;a.download=filename;a.click();
   URL.revokeObjectURL(url);
 }
 
