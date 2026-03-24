@@ -74,7 +74,8 @@
   .error-box{background:var(--red-light);color:var(--red);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;margin-top:.75rem;display:none;line-height:1.5}
   .divider{height:1px;background:var(--border);margin:1.25rem 0}
   .progress-bar{height:3px;background:var(--blue-light);border-radius:2px;margin-top:.75rem;overflow:hidden;display:none}
-  .progress-fill{height:100%;background:var(--blue);border-radius:2px;width:0;transition:width 25s linear}
+  .progress-fill{height:100%;background:var(--blue);border-radius:2px;width:0;transition:width 40s linear}
+  .wake-msg{font-size:12px;color:var(--text3);margin-top:8px;display:none;text-align:center}
   @media(max-width:768px){.layout{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:1px solid var(--border)}}
 </style>
 </head>
@@ -100,6 +101,7 @@
     </div>
     <button class="btn btn-primary" id="analyzeBtn" onclick="analyze()">Analizar oferta</button>
     <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="wake-msg" id="wakeMsg">Despertando el servidor... puede tardar hasta 30 segundos la primera vez.</div>
     <div class="error-box" id="errorBox"></div>
     <div class="divider"></div>
     <div class="section-title">Historial</div>
@@ -151,6 +153,7 @@
 <script>
 const SUPABASE_URL='https://eelgwbucnrqpuhivygde.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlbGd3YnVjbnJxcHVoaXZ5Z2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMzU2NTcsImV4cCI6MjA4OTgxMTY1N30.Bi3E9f2HZfrlohC_NP6BGNYlppusH2YJvhBfdk6dT1U';
+const API_URL='https://luis-career-api.onrender.com';
 const {createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentResult=null;
@@ -172,12 +175,14 @@ async function analyze(){
   const btn=document.getElementById('analyzeBtn');
   const bar=document.getElementById('progressBar');
   const fill=document.getElementById('progressFill');
+  const wake=document.getElementById('wakeMsg');
   btn.disabled=true;
   btn.innerHTML='<div class="spinner"></div> Analizando...';
   bar.style.display='block';
   fill.style.transition='none';
   fill.style.width='0';
-  setTimeout(()=>{fill.style.transition='width 25s linear';fill.style.width='85%'},50);
+  setTimeout(()=>{fill.style.transition='width 40s linear';fill.style.width='85%'},50);
+  setTimeout(()=>{wake.style.display='block'},5000);
   document.getElementById('errorBox').style.display='none';
 
   const exp=p.experience.map(e=>`${e.t} ${e.c} ${e.p}: ${e.b.join(' ')}`).join(' | ');
@@ -187,11 +192,11 @@ Summary: ${p.summary}
 Skills: ${p.skills.join(',')}
 Experience: ${exp}
 Education: ${p.education} | ${p.certs}
-JOB POSTING: ${job.substring(0,1200)}
-JSON format: {"score":85,"verdict":"short verdict","scoreDesc":"2 sentences","jobTitle":"title","company":"company","skillsMatch":["s1","s2"],"skillsGap":["g1","g2"],"adaptedCV":"full plain text CV tailored for this job","coverLetter":"cover letter mentioning Peru-Canada FTA eligibility","recommendations":[{"priority":"alta","title":"t","detail":"d"}]}`;
+JOB: ${job.substring(0,1200)}
+JSON: {"score":85,"verdict":"short verdict","scoreDesc":"2 sentences","jobTitle":"title","company":"company","skillsMatch":["s1","s2"],"skillsGap":["g1","g2"],"adaptedCV":"full plain text CV tailored for this job","coverLetter":"cover letter mentioning Peru-Canada FTA eligibility","recommendations":[{"priority":"alta","title":"t","detail":"d"}]}`;
 
   try{
-    const resp=await fetch('/.netlify/functions/claude',{
+    const resp=await fetch(API_URL+'/analyze',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({messages:[{role:'user',content:prompt}]})
@@ -213,6 +218,7 @@ JSON format: {"score":85,"verdict":"short verdict","scoreDesc":"2 sentences","jo
   }finally{
     btn.disabled=false;
     btn.innerHTML='Analizar oferta';
+    wake.style.display='none';
     fill.style.transition='width 0.5s';
     fill.style.width='100%';
     setTimeout(()=>{bar.style.display='none';fill.style.width='0'},600);
@@ -267,16 +273,10 @@ async function downloadWord(type){
     const line=lines[i];
     const isHeader=line===line.toUpperCase()&&line.trim().length>3&&!/^\s/.test(line)&&line.trim()!=='';
     const isBullet=/^[*\-•]/.test(line.trim());
-    if(isHeader){
-      children.push(new Paragraph({spacing:{before:200,after:60},border:{bottom:{style:BorderStyle.SINGLE,size:6,color:'1F4E79',space:4}},children:[new TextRun({text:line.trim(),bold:true,size:22,color:'1F4E79',font:'Calibri'})]}));
-    }else if(isBullet){
-      children.push(new Paragraph({numbering:{reference:'bullets',level:0},spacing:{before:40,after:40},children:[new TextRun({text:line.replace(/^[*\-•]\s*/,'').trim(),size:20,font:'Calibri'})]}));
-    }else if(line.trim()===''){
-      children.push(new Paragraph({spacing:{before:40,after:40},children:[new TextRun('')]}));
-    }else{
-      const bold=i===0||(i<5&&line.includes('|'));
-      children.push(new Paragraph({spacing:{before:40,after:40},children:[new TextRun({text:line,bold:bold,size:bold&&i===0?28:20,font:'Calibri',color:bold&&i===0?'1F4E79':'000000'})]}));
-    }
+    if(isHeader){children.push(new Paragraph({spacing:{before:200,after:60},border:{bottom:{style:BorderStyle.SINGLE,size:6,color:'1F4E79',space:4}},children:[new TextRun({text:line.trim(),bold:true,size:22,color:'1F4E79',font:'Calibri'})]}))}
+    else if(isBullet){children.push(new Paragraph({numbering:{reference:'bullets',level:0},spacing:{before:40,after:40},children:[new TextRun({text:line.replace(/^[*\-•]\s*/,'').trim(),size:20,font:'Calibri'})]}))}
+    else if(line.trim()===''){children.push(new Paragraph({spacing:{before:40,after:40},children:[new TextRun('')]}))}
+    else{const bold=i===0||(i<5&&line.includes('|'));children.push(new Paragraph({spacing:{before:40,after:40},children:[new TextRun({text:line,bold:bold,size:bold&&i===0?28:20,font:'Calibri',color:bold&&i===0?'1F4E79':'000000'})]}))}
   }
   const doc=new Document({
     numbering:{config:[{reference:'bullets',levels:[{level:0,format:LevelFormat.BULLET,text:'•',alignment:AlignmentType.LEFT,style:{paragraph:{indent:{left:360,hanging:200}}}}]}]},
