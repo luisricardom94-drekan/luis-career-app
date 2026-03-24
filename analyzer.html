@@ -206,10 +206,8 @@ JSON: {"score":85,"verdict":"short verdict","scoreDesc":"2 sentences","jobTitle"
       throw new Error(e.error||'Error del servidor: '+resp.status);
     }
     const data=await resp.json();
-    const raw=data.content.map(i=>i.text||'').join('').trim();
-    const m=raw.match(/\{[\s\S]*\}/);
-    if(!m)throw new Error('Respuesta inesperada de la IA');
-    const result=JSON.parse(m[0]);
+    if(!data.result)throw new Error(data.error||'Respuesta inesperada');
+    const result=data.result;
     await saveAnalysis(result,job,pt);
     renderResult(result);
     loadHistory();
