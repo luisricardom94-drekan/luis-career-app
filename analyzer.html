@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
-  :root{--bg:#f7f6f3;--surface:#ffffff;--border:#e8e5e0;--text:#1a1917;--text2:#6b6860;--text3:#9e9b96;--blue:#1F4E79;--blue-light:#e8f0f8;--green:#2d6a2d;--green-light:#eaf3ea;--amber:#7a4f00;--amber-light:#fef3e2;--red:#8b1a1a;--red-light:#fdecea;--radius:12px;--radius-sm:8px}
+  :root{--bg:#f7f6f3;--surface:#ffffff;--border:#e8e5e0;--text:#1a1917;--text2:#6b6860;--text3:#9e9b96;--blue:#1F4E79;--blue-light:#e8f0f8;--green:#2d6a2d;--green-light:#eaf3ea;--amber:#7a4f00;--red:#8b1a1a;--red-light:#fdecea;--radius:12px;--radius-sm:8px}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px}
   .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;height:60px;position:sticky;top:0;z-index:100;gap:16px}
@@ -74,7 +74,7 @@
   .error-box{background:var(--red-light);color:var(--red);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;margin-top:.75rem;display:none;line-height:1.5}
   .divider{height:1px;background:var(--border);margin:1.25rem 0}
   .progress-bar{height:3px;background:var(--blue-light);border-radius:2px;margin-top:.75rem;overflow:hidden;display:none}
-  .progress-fill{height:100%;background:var(--blue);border-radius:2px;width:0;transition:width 30s linear}
+  .progress-fill{height:100%;background:var(--blue);border-radius:2px;width:0;transition:width 25s linear}
   @media(max-width:768px){.layout{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:1px solid var(--border)}}
 </style>
 </head>
@@ -95,7 +95,7 @@
       </select>
     </div>
     <div class="form-group">
-      <label>Oferta de trabajo completa</label>
+      <label>Oferta de trabajo</label>
       <textarea id="jobPosting" rows="12" placeholder="Pega aqui el texto del job posting..."></textarea>
     </div>
     <button class="btn btn-primary" id="analyzeBtn" onclick="analyze()">Analizar oferta</button>
@@ -151,31 +151,19 @@
 <script>
 const SUPABASE_URL='https://eelgwbucnrqpuhivygde.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlbGd3YnVjbnJxcHVoaXZ5Z2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMzU2NTcsImV4cCI6MjA4OTgxMTY1N30.Bi3E9f2HZfrlohC_NP6BGNYlppusH2YJvhBfdk6dT1U';
-async function callClaude(prompt) {
-  const resp = await fetch('/.netlify/functions/claude', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
-  });
-  if (!resp.ok) {
-    const e = await resp.json().catch(() => ({}));
-    throw new Error(e.error || 'Error ' + resp.status);
-  }
-  return resp.json();
-}
 const {createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentResult=null;
- 
+
 const PROFILES={
-  data:{name:"Luis Ricardo Martinez Tobalina",title:"Data Analyst | BI Analyst | Information Systems Engineer",contact:"Lima Peru | Open to relocation to Canada | Eligible under Peru-Canada FTA | luis.ricardo.martinez.94@gmail.com | linkedin.com/in/luisricardomartinezt",summary:"Data Analyst and BI Specialist 9+ years consulting banking retail. ETL BI Power BI SQL Python DAX Diligent. WES Canadian equivalency Bachelor degree. IELTS 7.0 C1.",skills:["SQL","Python","ETL","Power BI","Tableau","DAX","Excel","Data Modeling","Data Governance","KPI Dashboards","Diligent ACL","Diligent Robotics","VBA","Agile","Scrum","Project Management"],experience:[{t:"Data Analyst Freelance",c:"Software & Consulting",p:"Jan 2026-Present",b:["Freelance BI and automation consulting. Power BI dashboards and ETL workflows."]},{t:"Project Manager",c:"Software & Consulting",p:"Jun 2023-Dec 2025",b:["Led audit automation 15+ clients. Audit time -40% accuracy +75%. 90% client satisfaction. Trained 500+ professionals. Efficiency +30%."]},{t:"Senior BI Consultant",c:"Software & Consulting",p:"Aug 2019-Jun 2023",b:["Diligent tools consultancy adoption +20%. Support inquiries -50%. Repeat business +25%."]},{t:"Information Analyst",c:"Interbank",p:"Feb 2018-Aug 2019",b:["Automated reports manual effort -50%. Power BI dashboards decision efficiency +30%. ETL reporting +40%."]},{t:"Strategic Analyst",c:"Cencosud",p:"Jun 2017-Dec 2017",b:["Automated reporting effort -60%. Excel macros productivity +35%."]}],education:"Bachelor Information Systems Engineering UPC Peru | WES Bachelor degree four years ECA 6940766IMM",certs:"IELTS 7.0 C1 L8.5 R7.0 W6.0 S7.0 | Python Data Analyst Idat 2024 | Power BI 2023 | BI Analyst DMC 2019"},
-  pm:{name:"Luis Ricardo Martinez Tobalina",title:"Project Manager | Technology & Data Consulting",contact:"Lima Peru | Open to relocation to Canada | Eligible under Peru-Canada FTA | luis.ricardo.martinez.94@gmail.com | linkedin.com/in/luisricardomartinezt",summary:"Project Manager 9+ years technology data consulting. 90% client satisfaction. Agile Scrum stakeholder management. WES Canadian equivalency Bachelor degree. IELTS 7.0 C1.",skills:["Project Planning","Risk Management","Agile","Scrum","Stakeholder Management","Cross-functional Leadership","Client Relations","Power BI","SQL","Python","ETL","Diligent ACL"],experience:[{t:"PM Consultant Freelance",c:"Software & Consulting",p:"Jan 2026-Present",b:["End-to-end project management automation and BI engagements."]},{t:"Project Manager",c:"Software & Consulting",p:"Jun 2023-Dec 2025",b:["Audit automation 15+ clients time -40% accuracy +75%. 90% satisfaction. 500+ trained. Efficiency +30%."]},{t:"Senior Consultant",c:"Software & Consulting",p:"Aug 2019-Jun 2023",b:["Diligent implementations adoption +20%. Repeat business +25%."]},{t:"Information Analyst",c:"Interbank",p:"Feb 2018-Aug 2019",b:["Reporting automation effort -50%. Forecast accuracy +15%."]},{t:"Strategic Analyst",c:"Cencosud",p:"Jun 2017-Dec 2017",b:["Reporting automation effort -60%."]}],education:"Bachelor Information Systems Engineering UPC Peru | WES Bachelor degree four years ECA 6940766IMM",certs:"IELTS 7.0 C1 | Python Data Analyst Idat 2024 | Power BI 2023"}
+  data:{name:"Luis Ricardo Martinez Tobalina",title:"Data Analyst | BI Analyst | Information Systems Engineer",contact:"Lima Peru | Open to relocation to Canada | Eligible under Peru-Canada FTA | luis.ricardo.martinez.94@gmail.com | linkedin.com/in/luisricardomartinezt",summary:"Data Analyst BI Specialist 9+ years consulting banking retail. ETL BI Power BI SQL Python DAX Diligent. WES Canadian equivalency Bachelor degree. IELTS 7.0 C1.",skills:["SQL","Python","ETL","Power BI","Tableau","DAX","Excel","Data Modeling","Data Governance","KPI Dashboards","Diligent ACL","Diligent Robotics","VBA","Agile","Scrum"],experience:[{t:"Data Analyst Freelance",c:"Software & Consulting",p:"Jan 2026-Present",b:["BI and automation consulting. Power BI dashboards and ETL workflows."]},{t:"Project Manager",c:"Software & Consulting",p:"Jun 2023-Dec 2025",b:["Audit automation 15+ clients. Time -40% accuracy +75%. 90% satisfaction. Trained 500+. Efficiency +30%."]},{t:"Senior BI Consultant",c:"Software & Consulting",p:"Aug 2019-Jun 2023",b:["Diligent tools adoption +20%. Support -50%. Repeat business +25%."]},{t:"Information Analyst",c:"Interbank",p:"Feb 2018-Aug 2019",b:["Reports automated -50%. Power BI dashboards +30% efficiency. ETL +40%."]},{t:"Strategic Analyst",c:"Cencosud",p:"Jun 2017-Dec 2017",b:["Reporting automation -60%. Excel macros +35%."]}],education:"Bachelor Information Systems Engineering UPC Peru | WES Bachelor degree four years ECA 6940766IMM",certs:"IELTS 7.0 C1 L8.5 R7.0 W6.0 S7.0 | Python Data Analyst 2024 | Power BI 2023 | BI Analyst DMC 2019"},
+  pm:{name:"Luis Ricardo Martinez Tobalina",title:"Project Manager | Technology & Data Consulting",contact:"Lima Peru | Open to relocation to Canada | Eligible under Peru-Canada FTA | luis.ricardo.martinez.94@gmail.com | linkedin.com/in/luisricardomartinezt",summary:"Project Manager 9+ years technology data consulting. 90% satisfaction. Agile Scrum stakeholder management. WES Canadian equivalency Bachelor degree. IELTS 7.0 C1.",skills:["Project Planning","Risk Management","Agile","Scrum","Stakeholder Management","Cross-functional Leadership","Client Relations","Power BI","SQL","Python","ETL","Diligent"],experience:[{t:"PM Consultant Freelance",c:"Software & Consulting",p:"Jan 2026-Present",b:["End-to-end project management automation and BI."]},{t:"Project Manager",c:"Software & Consulting",p:"Jun 2023-Dec 2025",b:["Audit automation 15+ clients -40% time +75% accuracy. 90% satisfaction. 500+ trained. +30% efficiency."]},{t:"Senior Consultant",c:"Software & Consulting",p:"Aug 2019-Jun 2023",b:["Diligent implementations adoption +20%. Repeat business +25%."]},{t:"Information Analyst",c:"Interbank",p:"Feb 2018-Aug 2019",b:["Automation -50% manual effort. Forecast +15%."]},{t:"Strategic Analyst",c:"Cencosud",p:"Jun 2017-Dec 2017",b:["Reporting automation -60%."]}],education:"Bachelor Information Systems Engineering UPC Peru | WES Bachelor degree four years ECA 6940766IMM",certs:"IELTS 7.0 C1 | Python Data Analyst 2024 | Power BI 2023"}
 };
- 
+
 function switchTab(t){document.querySelectorAll('.tab').forEach((x,i)=>x.classList.toggle('active',['cv','cover','recs'][i]===t));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active')}
 function copyText(id){navigator.clipboard.writeText(document.getElementById(id).innerText).catch(()=>{})}
 function showError(msg){const el=document.getElementById('errorBox');el.textContent=msg;el.style.display='block'}
- 
+
 async function analyze(){
   const job=document.getElementById('jobPosting').value.trim();
   if(job.length<30){showError('Pega el texto del job posting.');return}
@@ -187,27 +175,31 @@ async function analyze(){
   btn.disabled=true;
   btn.innerHTML='<div class="spinner"></div> Analizando...';
   bar.style.display='block';
+  fill.style.transition='none';
   fill.style.width='0';
-  setTimeout(()=>{fill.style.width='85%'},100);
+  setTimeout(()=>{fill.style.transition='width 25s linear';fill.style.width='85%'},50);
   document.getElementById('errorBox').style.display='none';
- 
+
   const exp=p.experience.map(e=>`${e.t} ${e.c} ${e.p}: ${e.b.join(' ')}`).join(' | ');
-  const prompt=`Canadian recruitment consultant. Analyze job fit.
+  const prompt=`Canadian recruitment consultant. Analyze job fit and return ONLY valid JSON no markdown no code fences.
 CANDIDATE: ${p.name} | ${p.title} | ${p.contact}
 Summary: ${p.summary}
 Skills: ${p.skills.join(',')}
-Exp: ${exp}
-Edu: ${p.education} | ${p.certs}
-JOB: ${job.substring(0,1200)}
-Return ONLY JSON no markdown: {"score":85,"verdict":"short verdict","scoreDesc":"2 sentences","jobTitle":"title","company":"company","skillsMatch":["s1","s2"],"skillsGap":["g1","g2"],"adaptedCV":"full plain text CV tailored for this job keeping all real data","coverLetter":"professional cover letter mentioning Peru-Canada FTA eligibility","recommendations":[{"priority":"alta","title":"t","detail":"d"}]}`;
- 
+Experience: ${exp}
+Education: ${p.education} | ${p.certs}
+JOB POSTING: ${job.substring(0,1200)}
+JSON format: {"score":85,"verdict":"short verdict","scoreDesc":"2 sentences","jobTitle":"title","company":"company","skillsMatch":["s1","s2"],"skillsGap":["g1","g2"],"adaptedCV":"full plain text CV tailored for this job","coverLetter":"cover letter mentioning Peru-Canada FTA eligibility","recommendations":[{"priority":"alta","title":"t","detail":"d"}]}`;
+
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    const resp=await fetch('/.netlify/functions/claude',{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':callClaude(prompt),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:prompt}]})
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({messages:[{role:'user',content:prompt}]})
     });
-    if(!resp.ok){const e=await resp.json().catch(()=>({}));throw new Error(e.error?.message||'Error '+resp.status)}
+    if(!resp.ok){
+      const e=await resp.json().catch(()=>({}));
+      throw new Error(e.error||'Error del servidor: '+resp.status);
+    }
     const data=await resp.json();
     const raw=data.content.map(i=>i.text||'').join('').trim();
     const m=raw.match(/\{[\s\S]*\}/);
@@ -221,15 +213,16 @@ Return ONLY JSON no markdown: {"score":85,"verdict":"short verdict","scoreDesc":
   }finally{
     btn.disabled=false;
     btn.innerHTML='Analizar oferta';
+    fill.style.transition='width 0.5s';
     fill.style.width='100%';
-    setTimeout(()=>{bar.style.display='none';fill.style.width='0'},500);
+    setTimeout(()=>{bar.style.display='none';fill.style.width='0'},600);
   }
 }
- 
+
 async function saveAnalysis(r,jobPosting,profileType){
   await db.from('job_analyses').insert({job_title:r.jobTitle||'Sin titulo',company:r.company||'Sin empresa',job_posting:jobPosting.substring(0,2000),profile_type:profileType,score:r.score,verdict:r.verdict,score_desc:r.scoreDesc,skills_match:r.skillsMatch,skills_gap:r.skillsGap,adapted_cv:r.adaptedCV,cover_letter:r.coverLetter,recommendations:r.recommendations});
 }
- 
+
 function renderResult(r){
   currentResult=r;
   const score=Math.min(100,Math.max(0,Math.round(r.score)));
@@ -248,13 +241,13 @@ function renderResult(r){
   document.getElementById('resultWrap').classList.add('show');
   switchTab('cv');
 }
- 
+
 async function loadHistory(){
   const{data}=await db.from('job_analyses').select('*').order('created_at',{ascending:false}).limit(20);
   if(!data||!data.length)return;
   document.getElementById('history').innerHTML=data.map(row=>`<div class="history-item" onclick="loadAnalysis('${row.id}')"><div class="hi-title">${row.job_title} - ${row.company}</div><div class="hi-meta">${row.score}% match · ${new Date(row.created_at).toLocaleDateString('es-PE')}</div></div>`).join('');
 }
- 
+
 async function loadAnalysis(id){
   const{data}=await db.from('job_analyses').select('*').eq('id',id).single();
   if(!data)return;
@@ -262,7 +255,7 @@ async function loadAnalysis(id){
   document.getElementById('profileType').value=data.profile_type;
   renderResult({score:data.score,verdict:data.verdict,scoreDesc:data.score_desc,skillsMatch:data.skills_match,skillsGap:data.skills_gap,adaptedCV:data.adapted_cv,coverLetter:data.cover_letter,recommendations:data.recommendations});
 }
- 
+
 async function downloadWord(type){
   if(!currentResult)return;
   const{Document,Packer,Paragraph,TextRun,AlignmentType,LevelFormat,BorderStyle}=docx;
@@ -272,14 +265,23 @@ async function downloadWord(type){
   const children=[];
   for(let i=0;i<lines.length;i++){
     const line=lines[i];
-    const isHeader=line.startsWith('--')||(line===line.toUpperCase()&&line.trim().length>3&&!line.startsWith(' '));
-    const isBullet=line.trim().startsWith('*')||line.trim().startsWith('-')||line.trim().startsWith('•');
-    if(isHeader){children.push(new Paragraph({spacing:{before:200,after:60},border:{bottom:{style:BorderStyle.SINGLE,size:6,color:'1F4E79',space:4}},children:[new TextRun({text:line.replace(/[-–—]+/g,'').trim(),bold:true,size:22,color:'1F4E79',font:'Calibri'})]}))}
-    else if(isBullet){children.push(new Paragraph({numbering:{reference:'bullets',level:0},spacing:{before:40,after:40},children:[new TextRun({text:line.replace(/^[*\-•]\s*/,'').trim(),size:20,font:'Calibri'})]}))}
-    else if(line.trim()===''){children.push(new Paragraph({spacing:{before:40,after:40},children:[new TextRun('')]}))}
-    else{const bold=i===0||(i<5&&line.includes('|'));children.push(new Paragraph({spacing:{before:40,after:40},children:[new TextRun({text:line,bold:bold,size:bold&&i===0?28:20,font:'Calibri',color:bold&&i===0?'1F4E79':'000000'})]}))}
+    const isHeader=line===line.toUpperCase()&&line.trim().length>3&&!/^\s/.test(line)&&line.trim()!=='';
+    const isBullet=/^[*\-•]/.test(line.trim());
+    if(isHeader){
+      children.push(new Paragraph({spacing:{before:200,after:60},border:{bottom:{style:BorderStyle.SINGLE,size:6,color:'1F4E79',space:4}},children:[new TextRun({text:line.trim(),bold:true,size:22,color:'1F4E79',font:'Calibri'})]}));
+    }else if(isBullet){
+      children.push(new Paragraph({numbering:{reference:'bullets',level:0},spacing:{before:40,after:40},children:[new TextRun({text:line.replace(/^[*\-•]\s*/,'').trim(),size:20,font:'Calibri'})]}));
+    }else if(line.trim()===''){
+      children.push(new Paragraph({spacing:{before:40,after:40},children:[new TextRun('')]}));
+    }else{
+      const bold=i===0||(i<5&&line.includes('|'));
+      children.push(new Paragraph({spacing:{before:40,after:40},children:[new TextRun({text:line,bold:bold,size:bold&&i===0?28:20,font:'Calibri',color:bold&&i===0?'1F4E79':'000000'})]}));
+    }
   }
-  const doc=new Document({numbering:{config:[{reference:'bullets',levels:[{level:0,format:LevelFormat.BULLET,text:'•',alignment:AlignmentType.LEFT,style:{paragraph:{indent:{left:360,hanging:200}}}}]}]},sections:[{properties:{page:{size:{width:12240,height:15840},margin:{top:900,right:1080,bottom:900,left:1080}}},children}]});
+  const doc=new Document({
+    numbering:{config:[{reference:'bullets',levels:[{level:0,format:LevelFormat.BULLET,text:'•',alignment:AlignmentType.LEFT,style:{paragraph:{indent:{left:360,hanging:200}}}}]}]},
+    sections:[{properties:{page:{size:{width:12240,height:15840},margin:{top:900,right:1080,bottom:900,left:1080}}},children}]
+  });
   const buffer=await Packer.toBuffer(doc);
   const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
   const url=URL.createObjectURL(blob);
@@ -287,7 +289,7 @@ async function downloadWord(type){
   a.href=url;a.download=filename;a.click();
   URL.revokeObjectURL(url);
 }
- 
+
 loadHistory();
 </script>
 </body>
